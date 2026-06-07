@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriVibe - Sức Khỏe Vàng Cho Gia Đình</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-amber-50/40 text-slate-800 font-sans">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-amber-100">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <a href="#" class="text-2xl font-black text-amber-600 flex items-center gap-2 tracking-wide">
+                <i class="fa-solid fa-mortar-pestle"></i> NutriVibe
+            </a>
+            
+            <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                <div class="relative">
+                    <input type="text" id="search-input" oninput="searchProducts()" placeholder="Tìm kiếm sản phẩm..." class="border border-slate-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-amber-500 w-full sm:w-56 transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+                </div>
+                <div class="flex gap-1 overflow-x-auto">
+                    <button onclick="filterCategory('all')" class="nav-btn bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap">Tất cả</button>
+                    <button onclick="filterCategory('nutrition')" class="nav-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap">Dinh dưỡng cao cấp</button>
+                    <button onclick="filterCategory('medical')" class="nav-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap">Thiết bị gia đình</button>
+                </div>
+            </div>
+
+            <div class="relative cursor-pointer px-3 py-2 bg-amber-50 hover:bg-amber-100 rounded-lg transition" onclick="toggleCartModal()">
+                <i class="fa-solid fa-bag-shopping text-xl text-amber-700"></i>
+                <span id="cart-count" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow">0</span>
+            </div>
+        </div>
+    </header>
+
+    <section class="bg-gradient-to-r from-amber-500 via-orange-600 to-amber-700 text-white py-14 text-center px-4 shadow-inner">
+        <h1 class="text-3xl md:text-4xl font-extrabold mb-2 tracking-tight">Hệ Thống Phân Phối Sức Khỏe NutriVibe</h1>
+        <p class="text-amber-100 max-w-xl mx-auto text-xs md:text-sm uppercase tracking-widest font-medium">An toàn - Chính hãng - Phục vụ tận tâm chu đáo</p>
+    </section>
+
+    <main class="container mx-auto px-4 py-10">
+        <h2 class="text-xl font-extrabold text-slate-800 mb-6 uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-5 bg-orange-500"></span> Sản phẩm sức khỏe tiêu chuẩn
+        </h2>
+        
+        <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            </div>
+
+        <div class="flex justify-center items-center gap-1.5 mt-10" id="pagination">
+            </div>
+    </main>
+
+    <div id="cart-modal" class="fixed inset-0 bg-slate-900/40 z-50 flex justify-end hidden backdrop-blur-xs">
+        <div class="bg-white w-full max-w-md h-full flex flex-col p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-cart-shopping text-amber-600 mr-2"></i>Danh sách chọn mua</h3>
+                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600 text-2xl cursor-pointer">&times;</button>
+            </div>
+            
+            <div id="cart-items" class="flex-1 overflow-y-auto space-y-4 pr-1">
+                </div>
+
+            <div class="border-t pt-4 mt-4 space-y-4">
+                <div class="flex justify-between items-center font-bold text-base text-slate-800">
+                    <span>Tổng tiền thanh toán:</span>
+                    <span id="cart-total" class="text-red-600 text-lg">0đ</span>
+                </div>
+                <button onclick="openOrderModal()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg transition cursor-pointer uppercase tracking-wider text-xs">
+                    Xác nhận thông tin giao nhận
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-modal" class="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center hidden px-4">
+        <div class="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeOrderModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-2xl cursor-pointer">&times;</button>
+            <h4 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2 border-slate-100">
+                <i class="fa-solid fa-file-invoice text-amber-600"></i> Phiếu Đăng Ký Đơn Hàng
+            </h4>
+            
+            <form id="customer-form" onsubmit="submitToGoogleForm(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Tên khách hàng nhận *</label>
+                    <input type="text" id="form-name" required placeholder="Nguyễn Văn A" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Số điện thoại di động *</label>
+                    <input type="tel" id="form-phone" required placeholder="0901234567" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Địa chỉ nhận hàng chi tiết *</label>
+                    <input type="text" id="form-address" required placeholder="Số nhà, Tên đường, Tỉnh/Thành phố" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Danh sách mặt hàng đặt mua</label>
+                    <textarea id="form-products" readonly rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-500 focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">Yêu cầu/Ghi chú riêng</label>
+                    <input type="text" id="form-note" placeholder="Ví dụ: Giao ngoài giờ hành chính..." class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-500">
+                </div>
+                
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-lg transition cursor-pointer text-sm uppercase">
+                    Gửi Đơn & Đến Bước Thanh Toán <i class="fa-solid fa-arrow-right text-xs ml-0.5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center hidden px-4">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full text-center shadow-2xl relative border-t-4 border-amber-500">
+            <button onclick="closeQrModal()" class="absolute top-3 right-4 text-slate-400 hover:text-slate-600 text-2xl cursor-pointer">&times;</button>
+            <h4 class="text-lg font-bold text-slate-800 mb-1">Cổng Quét QR Code</h4>
+            <p class="text-xs text-slate-400 mb-4">Thông tin của bạn đã được chuyển ngầm đến trang tính dữ liệu!</p>
+            
+            <div class="bg-slate-50 p-4 rounded-xl inline-block mb-4 border border-slate-100">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=NutriVibe-Order-Payment" alt="QR Thanh Toan" class="mx-auto w-44 h-44 rounded shadow-xs">
+            </div>
+            
+            <p class="text-sm font-bold text-red-600 mb-4">Tổng tiền hóa đơn: <span id="qr-total">0đ</span></p>
+            <button onclick="confirmPaymentFinished()" class="bg-slate-800 text-white py-2.5 rounded-lg text-xs w-full font-bold hover:bg-slate-900 transition cursor-pointer">XÁC NHẬN ĐÃ CHUYỂN KHOẢN XONG</button>
+        </div>
+    </div>
+
+    <script>
+        // Danh sách ĐÚNG 18 loại sản phẩm sức khỏe mới hoàn toàn không trùng lặp tên cũ
+        const allProducts = [
+            { id: 1, category: 'nutrition', name: "Cao Hồng Sâm Linh Chi Đỏ", price: 1350000, img: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=500&q=80" },
+            { id: 2, category: 'nutrition', name: "Yến Sào Nguyên Tổ Khánh Hòa", price: 3200000, img: "https://images.unsplash.com/photo-1511140880311-df74187bb0bb?w=500&q=80" },
+            { id: 3, category: 'nutrition', name: "Bổ Não Cao Cấp Ginkgo Pure", price: 450000, img: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&q=80" },
+            { id: 4, category: 'nutrition', name: "Đông Trùng Hạ Thảo Tây Tạng", price: 1600000, img: "https://images.unsplash.com/photo-1611070973770-b1a672610041?w=500&q=80" },
+            { id: 5, category: 'nutrition', name: "Nước Sâm Gói Hàn Quốc Gold", price: 680000, img: "https://images.unsplash.com/photo-1547489432-cf93fa6c71ee?w=500&q=80" },
+            { id: 6, category: 'nutrition', name: "Viên Uống Tinh Dầu Tỏi 1000mg", price: 290000, img: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=500&q=80" },
+            { id: 7, category: 'nutrition', name: "Viên Nang Canxi Nano D3", price: 340000, img: "https://images.unsplash.com/photo-1626847037657-fd3622613ce3?w=500&q=80" },
+            { id: 8, category: 'nutrition', name: "Dầu Cá Hồi Omega Thủy Phân", price: 520000, img: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=500&q=80" },
+            { id: 9, category: 'nutrition', name: "Vitamin Tổng Hợp Daily Health", price: 410000, img: "https://images.unsplash.com/photo-1576186726115-4d51596775d1?w=500&q=80" },
+            
+            { id: 10, category: 'medical', name: "Máy Đo Huyết Áp Bắp Tay Điện Tử", price: 890000, img: "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=500&q=80" },
+            { id: 11, category: 'medical', name: "Máy Xông Mũi Họng Khí Dung Omron", price: 1150000, img: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=500&q=80" },
+            { id: 12, category: 'medical', name: "Hộp Sơ Cứu Khẩn Cấp Chuẩn Gia Đình", price: 250000, img: "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=500&q=80" },
+            { id: 13, category: 'medical', name: "Máy Đo Đường Huyết Không Cần Lấy Máu", price: 1450000, img: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&q=80" },
+            { id: 14, category: 'medical', name: "Nhiệt Kế Hồng Ngoại Quét Trán", price: 390000, img: "https://images.unsplash.com/photo-1584516032966-7c37b676f0c8?w=500&q=80" },
+            { id: 15, category: 'medical', name: "Máy Đo Nồng Độ Oxy Trong Máu SpO2", price: 320000, img: "https://images.unsplash.com/photo-1584515980181-12df7002e1c3?w=500&q=80" },
+            { id: 16, category: 'medical', name: "Đèn Hồng Ngoại Trị Liệu Giảm Đau", price: 580000, img: "https://images.unsplash.com/photo-1579684389782-64d84b5e901a?w=500&q=80" },
+            { id: 17, category: 'medical', name: "Máy Massage Xung Điện Vật Lý Trị Liệu", price: 750000, img: "https://images.unsplash.com/photo-1519824141125-90d67695e1a3?w=500&q=80" },
+            { id: 18, category: 'medical', name: "Cân Sức Khỏe Phân Tích Chỉ Số Cơ Thể", price: 450000, img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=500&q=80" }
+        ];
+
+        let filteredProducts = [...allProducts];
+        let cart = [];
+        let currentPage = 1;
+        const itemsPerPage = 6; // ĐÚNG YÊU CẦU ĐỀ BÀI: 6 SẢN PHẨM TRÊN 1 TRANG
+
+        function formatMoney(amount) {
+            return amount.toLocaleString('vi-VN') + 'đ';
+        }
+
+        // Tải danh sách sản phẩm theo trang hiện tại
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageItems = filteredProducts.slice(startIndex, endIndex);
+
+            if(pageItems.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">Không có mặt hàng nào phù hợp với từ khóa của bạn.</div>`;
+                renderPagination(0);
+                return;
+            }
+
+            grid.innerHTML = pageItems.map(p => `
+                <div class="bg-white rounded-lg border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+                    <div class="relative">
+                        <img src="${p.img}" alt="${p.name}" class="w-full h-48 object-cover bg-slate-50">
+                        <span class="absolute top-2 left-2 text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded bg-slate-900 text-white">
+                            ${p.category === 'nutrition' ? 'Dinh Dưỡng' : 'Thiết Bị Y Tế'}
+                        </span>
+                    </div>
+                    <div class="p-4 flex-1 flex flex-col justify-between">
+                        <h3 class="font-bold text-slate-800 text-sm mb-3 line-clamp-2 h-10 tracking-tight">${p.name}</h3>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+                            <span class="text-orange-600 font-extrabold text-base">${formatMoney(p.price)}</span>
+                            <button onclick="addToCart(${p.id})" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold transition shadow-xs cursor-pointer">
+                                <i class="fa-solid fa-cart-plus mr-1"></i>Thêm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderPagination(filteredProducts.length);
+        }
+
+        // Vẽ các nút phân trang
+        function renderPagination(totalItems) {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            
+            if(totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            for(let i = 1; i <= totalPages; i++) {
+                html += `
+                    <button onclick="goToPage(${i})" class="w-8 h-8 rounded border text-xs font-bold transition cursor-pointer ${currentPage === i ? 'bg-amber-500 text-white border-amber-500 shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-300'}">
+                        ${i}
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderProducts();
+            window.scrollTo({ top: 300, behavior: 'smooth' });
+        }
+
+        // Lọc tìm kiếm thời gian thực
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            filteredProducts = allProducts.filter(p => p.name.toLowerCase().includes(query));
+            currentPage = 1;
+            renderProducts();
+        }
+
+        // Lọc theo tabs phân loại danh mục
+        function filterCategory(cat) {
+            const buttons = document.querySelectorAll('.nav-btn');
+            buttons.forEach(btn => btn.className = "nav-btn bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap");
+            event.target.className = "nav-btn bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap";
+
+            document.getElementById('search-input').value = '';
+            if(cat === 'all') {
+                filteredProducts = [...allProducts];
+            } else {
+                filteredProducts = allProducts.filter(p => p.category === cat);
+            }
+            currentPage = 1;
+            renderProducts();
+        }
+
+        // Thêm hàng vào giỏ hàng
+        function addToCart(id) {
+            const product = allProducts.find(p => p.id === id);
+            const exist = cart.find(item => item.id === id);
+            if(exist) {
+                exist.quantity += 1;
+            } else {
+                cart.push({...product, quantity: 1});
+            }
+            updateCart();
+        }
+
+        function updateCart() {
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-count').innerText = totalCount;
+
+            const totalMoney = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('cart-total').innerText = formatMoney(totalMoney);
+            document.getElementById('qr-total').innerText = formatMoney(totalMoney);
+
+            const container = document.getElementById('cart-items');
+            if(cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs"><i class="fa-solid fa-basket-shopping text-3xl mb-2 block text-slate-300"></i>Giỏ hàng trống</div>`;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="flex gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 items-center">
+                    <img src="${item.img}" class="w-10 h-10 object-cover rounded bg-white">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-xs font-bold text-slate-800 truncate">${item.name}</h4>
+                        <p class="text-xs text-orange-600 font-bold">${formatMoney(item.price)}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded border border-slate-200">
+                        <button onclick="changeQty(${item.id}, -1)" class="text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer">-</button>
+                        <span class="text-xs font-bold w-3 text-center text-slate-800">${item.quantity}</span>
+                        <button onclick="changeQty(${item.id}, 1)" class="text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            item.quantity += delta;
+            if(item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCart();
+        }
+
+        function toggleCartModal() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function openOrderModal() {
+            if(cart.length === 0) {
+                alert("Bạn chưa chọn sản phẩm nào vào giỏ!");
+                return;
+            }
+            const productText = cart.map(item => `- ${item.name} [SL: ${item.quantity}]`).join('\n');
+            document.getElementById('form-products').value = productText;
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeOrderModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+        }
+
+        // GỬI DỮ LIỆU ĐẾN GOOGLE FORM THÔNG QUA PHƯƠNG THỨC FETCH NO-CORS
+        function submitToGoogleForm(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('form-name').value;
+            const phone = document.getElementById('form-phone').value;
+            const address = document.getElementById('form-address').value;
+            const productsList = document.getElementById('form-products').value;
+            const note = document.getElementById('form-note').value;
+
+            // ĐỐI VỚI WEB MỚI: Bạn hãy tạo 1 cái Google Form mới tinh, dán link formResponse và mã entry mới vào đây nhé
+            const googleFormUrl = "https://docs.google.com/forms/d/1WMinERUCSLyBEA4shcZfATeOex8opYIEl0Ym_ytTeaM/formResponse";
+            
+            const formData = new URLSearchParams();
+            formData.append('entry.2056921464', name);         
+            formData.append('entry.2067360608', phone);        
+            formData.append('entry.752014990', address);      
+            formData.append('entry.899080791', productsList);  
+            formData.append('entry.1991869987', note);         
+
+            fetch(googleFormUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                mode: 'no-cors',
+                body: formData.toString()
+            })
+            .then(() => {
+                closeOrderModal();
+                document.getElementById('qr-modal').classList.remove('hidden');
+            })
+            .catch(err => {
+                alert("Lỗi đường truyền! Vui lòng thử lại sau.");
+                console.error(err);
+            });
+        }
+
+        function closeQrModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+        }
+
+        function confirmPaymentFinished() {
+            alert("Đơn hàng NutriVibe của bạn đã hoàn tất! Dữ liệu đã truyền ngầm về trang tính của Admin.");
+            cart = [];
+            updateCart();
+            closeQrModal();
+            toggleCartModal();
+            document.getElementById('customer-form').reset();
+        }
+
+        window.onload = () => {
+            renderProducts();
+            updateCart();
+        };
+    </script>
+</body>
+</html>
